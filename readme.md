@@ -1,4 +1,4 @@
-emigroup & Monoid
+# Semigroup & Monoid
 ## Semigroup
 A `Semigroup` has a `binary operator`. Below the typeclass definition :
 
