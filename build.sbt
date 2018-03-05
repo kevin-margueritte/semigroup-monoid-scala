@@ -8,7 +8,7 @@ lazy val root = (project in file(".")).
       version      := "0.1.0-SNAPSHOT"
     )),
     name := "Poc Monoid",
-    libraryDependencies += scalaTest % Test,
+    libraryDependencies += scalaTest,
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
     scalacOptions ++= Seq(
       "-deprecation", // Warn when deprecated API are used
