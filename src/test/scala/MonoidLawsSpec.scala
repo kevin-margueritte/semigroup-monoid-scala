@@ -1,20 +1,25 @@
-import org.scalacheck.Gen
+import kmargueritte.definition.Monoid
+import org.scalacheck.{Gen, Prop}
 import org.scalacheck.Prop._
 
 trait MonoidLaws[A] {
 
-  def associativity(combine: (A, A) => A, gen: Gen[A]) = {
+  def associativity(monoid: Monoid[A], gen: Gen[A]): Prop = {
     forAll(for {
       x <- gen
       y <- gen
       z <- gen
     } yield (x, y, z)) { case (x,y,z) =>
-      combine(combine(x, y), z) == combine(x, combine(x, y))
+      monoid.combine(monoid.combine(x, y), z) == monoid.combine(x, monoid.combine(x, y))
     }
   }
 
-  def identity(combine: (A, A) => A, gen: Gen[A]) = {
-    
+  def identity(monoid: Monoid[A], gen: Gen[A]): Prop = {
+    forAll(for {
+      x <- gen
+    } yield x) { x =>
+      monoid.combine(x, monoid.empty) == monoid.combine(monoid.empty, x)
+    }
   }
 
 }
