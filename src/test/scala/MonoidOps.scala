@@ -1,9 +1,8 @@
 import kmargueritte.definition.Monoid
-import org.scalatest._
-import org.scalacheck._
-import prop._
+import org.scalacheck.Gen
+import org.scalatest.FlatSpec
 
-class MonoidOps extends FlatSpec with Matchers with PropertyChecks with MonoidLaws[Int] {
+class MonoidOps extends FlatSpec with MonoidLaws[Int] {
 
   def twice(x: Int): Int = x * 2
 
@@ -19,20 +18,20 @@ class MonoidOps extends FlatSpec with Matchers with PropertyChecks with MonoidLa
       import kmargueritte.implementation.MonoidOps.sum
       import syntax._
 
-      Prop.forAll { (x: Int, y: Int) =>
-        (x |+| y) should be(x + y)
+      forAll { (x: Int, y: Int) =>
+        (x |+| y) should equal(x + y)
       }
 
-      Prop.forAll { (x: Int, y: Int) =>
-        (x.|+|(y)) == x + y
+      forAll { (x: Int, y: Int) =>
+        (x.|+|(y)) should equal(x + y)
       }
 
-      Prop.forAll { (x: Int, y: Int) =>
-        (twice(x) |+| y) == x*2 + y
+      forAll { (x: Int, y: Int) =>
+        (twice(x) |+| y) should equal(x*2 + y)
       }
 
-      Prop.forAll { (l: List[Int]) =>
-        sum.combineAll(l) == l.foldLeft(0)((x,y) => x + y)
+      forAll { (l: List[Int]) =>
+        sum.combineAll(l) should equal(l.foldLeft(0)((x,y) => x + y))
       }
 
     }
@@ -43,12 +42,12 @@ class MonoidOps extends FlatSpec with Matchers with PropertyChecks with MonoidLa
       import kmargueritte.implementation.MonoidOps.mult
       import syntax._
 
-      Prop.forAll { (x: Int, y: Int) =>
+      forAll { (x: Int, y: Int) =>
         (x |+| y) == x * y
       }
 
-      Prop.forAll { (l: List[Int]) =>
-        mult.combineAll(l) == l.foldLeft(0)((x,y) => x * y)
+      forAll { (l: List[Int]) =>
+        mult.combineAll(l) should equal (l.foldLeft(1)((x,y) => x * y))
       }
 
     }
