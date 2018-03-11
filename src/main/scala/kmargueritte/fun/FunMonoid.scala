@@ -29,16 +29,56 @@ object FunMonoid {
     override def empty: Option[A] = None
   }
 
-  def endoMoinoid[A] = new Monoid[A => A] {
+  def endoMonoid[A] = new Monoid[A => A] {
     override def combine(x: A => A, y: A => A): A => A = x.compose(y)
     override def empty: A => A = a => a
+  }
+
+  def dual[A](m: Monoid[A]) = new Monoid[A] {
+    override def combine(x: A, y: A): A = m.combine(y,x)
+    override def empty: A = m.empty
   }
 
   def foldMap[A,B](l: List[A], m: Monoid[B])(f: A => B): B = {
     l.foldLeft(m.empty)((x,y) => m.combine(x, f(y)))
   }
 
-  //def foldRightViaFoldMap[A,B](l: List[A])(z: B)(f: (B, A) => B): B = {
-    //foldMap(l)
-  //}
+  def foldRightViaFoldMap[A,B](l: List[A])(z: B)(f: (A, B) => B): B = {
+    foldMap[A, B => B](l, endoMonoid[B])(f.curried)(z)
+  }
+
+  def foldLeftViaFoldMap[A,B](l: List[A])(z: B)(f: (B, A) => B): B = {
+    foldMap[A, B => B](l, dual(endoMonoid[B]))(a => b => f(b,a))(z)
+  }
+
+  def foldMapV[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
+    v.size match {
+      case 0 => m.empty
+      case 1 => f(v.head)
+      case other =>
+        val splitted = v.splitAt((other/2).toInt)
+        m.combine(foldMapV(splitted._1, m)(f), foldMapV(splitted._2, m)(f))
+    }
+  }
+
+  def ordered(v: IndexedSeq[Int]): Boolean= {
+    def monoidOrder = new Monoid[Option[Int]] {
+      override def combine(x: Option[Int], y: Option[Int]): Option[Int] = {
+        (x, y) match {
+          case (None, _) => None
+          case (_, None) => None
+          case (Some(x), Some(y)) =>
+            if (x < y) Some(y)
+            else None
+        }
+      }
+      override def empty: Option[Int] = Some(Int.MinValue)
+    }
+
+    foldMapV(v, monoidOrder)(Some.apply) match {
+      case Some(_) => true
+      case None => false
+    }
+  }
+
 }
