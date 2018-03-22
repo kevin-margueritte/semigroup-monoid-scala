@@ -1,9 +1,11 @@
 import kmargueritte.definition.Monoid
 import org.scalacheck.Gen
 import org.scalatest.Matchers
-import org.scalatest.prop.PropertyChecks
+import org.scalacheck.Prop
+import org.scalacheck.Test.Parameters
 
-trait MonoidLaws[A] extends PropertyChecks with Matchers {
+
+trait MonoidLaws[A] {
 
   def associativity(monoid: Monoid[A], gen: Gen[A]) = {
     val generator = for {
@@ -12,8 +14,8 @@ trait MonoidLaws[A] extends PropertyChecks with Matchers {
       z <- gen
     } yield (x, y, z)
 
-    forAll(generator) { case (x,y,z) =>
-      monoid.combine(monoid.combine(x, y), z) should equal (monoid.combine(z, monoid.combine(x, y)))
+    Prop.forAll(generator) { case (x,y,z) =>
+      monoid.combine(monoid.combine(x, y), z) == monoid.combine(z, monoid.combine(x, y))
     }
   }
 
@@ -22,7 +24,7 @@ trait MonoidLaws[A] extends PropertyChecks with Matchers {
       x <- gen
     } yield x
 
-    forAll(generator) { x =>
+    Prop.forAll(generator) { x =>
       monoid.combine(x, monoid.empty) == monoid.combine(monoid.empty, x)
     }
   }

@@ -1,16 +1,18 @@
 import kmargueritte.definition.Monoid
 import org.scalacheck.Gen
-import org.scalatest.FlatSpec
+import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.prop.Checkers._
 
-class MonoidOps extends FlatSpec with MonoidLaws[Int] {
+class MonoidOps extends FlatSpec with MonoidLaws[Int] with PropertyChecks with Matchers {
 
   def twice(x: Int): Int = x * 2
 
-  "Monoid sum" must
+  "Monoid sum" should
     "respect laws" in {
       import kmargueritte.implementation.MonoidOps.sum
-      associativity(implicitly[Monoid[Int]], Gen.posNum[Int])
-      identity(implicitly[Monoid[Int]], Gen.posNum[Int])
+      check(associativity(implicitly[Monoid[Int]], Gen.posNum[Int]))
+      check(identity(implicitly[Monoid[Int]], Gen.posNum[Int]))
     }
 
     it must "have a correct sum operator" in {
@@ -36,7 +38,7 @@ class MonoidOps extends FlatSpec with MonoidLaws[Int] {
 
     }
 
-  "Monoid mult" must
+  "Monoid mult" should
     "have a correct mult operator" in {
 
       import kmargueritte.implementation.MonoidOps.mult
@@ -54,8 +56,8 @@ class MonoidOps extends FlatSpec with MonoidLaws[Int] {
 
     it must "respect laws" in {
       import kmargueritte.implementation.MonoidOps.mult
-      associativity(implicitly[Monoid[Int]], Gen.posNum[Int])
-      identity(implicitly[Monoid[Int]], Gen.posNum[Int])
+      check(associativity(implicitly[Monoid[Int]], Gen.posNum[Int]))
+      check(identity(implicitly[Monoid[Int]], Gen.posNum[Int]))
     }
 
 }

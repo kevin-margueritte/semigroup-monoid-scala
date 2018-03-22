@@ -34,6 +34,11 @@ object FunMonoid {
     override def empty: A => A = a => a
   }
 
+  def reverse[A](monoid: Monoid[A]) = new Monoid[A] {
+    override def combine(x: A, y: A): A = monoid.combine(y,x)
+    override def empty: A = monoid.empty
+  }
+
   def dual[A](m: Monoid[A]) = new Monoid[A] {
     override def combine(x: A, y: A): A = m.combine(y,x)
     override def empty: A = m.empty
@@ -79,6 +84,27 @@ object FunMonoid {
       case Some(_) => true
       case None => false
     }
+  }
+
+  def foldMapV[A, B](l: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
+    l.size match {
+      case 0 => m.empty
+      case 1 => f(l.head)
+      case x => {
+        val (first, second) = l.splitAt(x/2)
+        m.combine(foldMapV(first, m)(f), foldMapV(second, m)(f))
+      }
+    }
+  }
+
+  // (A, B => B) => B
+  def foldRightViaFoldMap[A,B](l: List[A])(z: B)(f: (A, B) => B): B = {
+    foldMap[A, B => B](l, endoMonoid[B])(f.curried).apply(z)
+  }
+
+  // (B => B, A) => B
+  def foldLeftViaFoldMap[A,B](l: List[A])(z: B)(f: (B, A) => B): B = {
+    foldMap[A, B => B](l, reverse(endoMonoid[B]))(a => b => f(b, a)).apply(z)
   }
 
 }
