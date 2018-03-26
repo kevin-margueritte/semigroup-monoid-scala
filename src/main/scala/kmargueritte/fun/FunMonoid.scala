@@ -106,5 +106,4 @@ object FunMonoid {
   def foldLeftViaFoldMap[A,B](l: List[A])(z: B)(f: (B, A) => B): B = {
     foldMap[A, B => B](l, reverse(endoMonoid[B]))(a => b => f(b, a)).apply(z)
   }
-
 }
