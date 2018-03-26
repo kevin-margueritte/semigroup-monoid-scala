@@ -1,4 +1,5 @@
 import kmargueritte.definition.Monoid
+import kmargueritte.laws.MonoidLaws
 import org.scalacheck.Gen
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.prop.PropertyChecks

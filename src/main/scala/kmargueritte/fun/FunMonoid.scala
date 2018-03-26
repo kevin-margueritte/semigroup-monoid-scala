@@ -39,31 +39,18 @@ object FunMonoid {
     override def empty: A = monoid.empty
   }
 
-  def dual[A](m: Monoid[A]) = new Monoid[A] {
-    override def combine(x: A, y: A): A = m.combine(y,x)
-    override def empty: A = m.empty
-  }
-
   def foldMap[A,B](l: List[A], m: Monoid[B])(f: A => B): B = {
     l.foldLeft(m.empty)((x,y) => m.combine(x, f(y)))
   }
 
+  // (A, B => B) => B
   def foldRightViaFoldMap[A,B](l: List[A])(z: B)(f: (A, B) => B): B = {
-    foldMap[A, B => B](l, endoMonoid[B])(f.curried)(z)
+    foldMap[A, B => B](l, endoMonoid[B])(f.curried).apply(z)
   }
 
+  // (B => B, A) => B
   def foldLeftViaFoldMap[A,B](l: List[A])(z: B)(f: (B, A) => B): B = {
-    foldMap[A, B => B](l, dual(endoMonoid[B]))(a => b => f(b,a))(z)
-  }
-
-  def foldMapV[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
-    v.size match {
-      case 0 => m.empty
-      case 1 => f(v.head)
-      case other =>
-        val splitted = v.splitAt((other/2).toInt)
-        m.combine(foldMapV(splitted._1, m)(f), foldMapV(splitted._2, m)(f))
-    }
+    foldMap[A, B => B](l, reverse(endoMonoid[B]))(a => b => f(b, a)).apply(z)
   }
 
   def ordered(v: IndexedSeq[Int]): Boolean= {
@@ -95,15 +82,5 @@ object FunMonoid {
         m.combine(foldMapV(first, m)(f), foldMapV(second, m)(f))
       }
     }
-  }
-
-  // (A, B => B) => B
-  def foldRightViaFoldMap[A,B](l: List[A])(z: B)(f: (A, B) => B): B = {
-    foldMap[A, B => B](l, endoMonoid[B])(f.curried).apply(z)
-  }
-
-  // (B => B, A) => B
-  def foldLeftViaFoldMap[A,B](l: List[A])(z: B)(f: (B, A) => B): B = {
-    foldMap[A, B => B](l, reverse(endoMonoid[B]))(a => b => f(b, a)).apply(z)
   }
 }
